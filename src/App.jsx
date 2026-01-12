@@ -1,53 +1,50 @@
+/**
+ * 依存関係のインストールコマンド:
+ * npm install lucide-react recharts
+ */
+
 import React, { useState, useEffect, useMemo } from 'react';
 import { 
-  CheckCircle, 
+  Home, 
+  ChevronLeft, 
+  ChevronRight, 
+  CheckCircle2, 
   XCircle, 
-  AlertCircle, 
-  Play, 
+  Bookmark, 
+  List, 
   RotateCcw, 
-  BookOpen, 
-  CheckSquare, 
-  ArrowRight,
-  List,
-  Trophy,
-  Calculator,
-  HelpCircle
+  AlertCircle,
+  BarChart3,
+  Check
 } from 'lucide-react';
-import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip as RechartsTooltip, Legend } from 'recharts';
+import { 
+  BarChart, 
+  Bar, 
+  XAxis, 
+  YAxis, 
+  CartesianGrid, 
+  Tooltip as RechartsTooltip, 
+  ResponsiveContainer, 
+  Cell 
+} from 'recharts';
 
-// --- データ定義 (全7問: 過去問セレクト演習 2-4 キャッシュ・フロー計算書) ---
-
-const problemData = [
+// --- クイズデータ定義 ---
+const QUIZ_DATA = [
   {
     id: 1,
-    category: "資金の範囲",
-    question: "キャッシュ・フロー計算書が対象とする資金の範囲は、現金及び現金同等物である。現金同等物に含まれる短期投資に該当する最も適切なものの組み合わせを下記の解答群から選べ。なお、ａ〜ｅの資産の運用期間はすべて3か月以内であるとする。\n\nａ 株式\nｂ 株式投資信託\nｃ コマーシャル・ペーパー\nｄ 定期預金\nｅ 普通預金",
-    options: [
-      "ａ と ｂ",
-      "ａ と ｃ",
-      "ｂ と ｃ",
-      "ｃ と ｄ",
-      "ｄ と ｅ"
-    ],
-    correctAnswer: 3,
-    explanation: `
-      <p class="font-bold mb-2">正解：エ (ｃ と ｄ)</p>
-      <div class="bg-blue-50 p-3 rounded text-sm mb-2">
-        <p class="font-bold border-b border-blue-200 mb-1">資金の範囲</p>
-        [cite_start]<p><strong>① 現金：</strong> 手許現金、要求払預金（当座、普通、通知預金など）[cite: 354]</p>
-        [cite_start]<p><strong>② 現金同等物：</strong> 容易に換金可能で、価値変動リスクが僅少な短期投資（取得日から満期・償還まで<strong>3か月以内</strong>） [cite: 356]</p>
-      </div>
-      <ul class="text-xs space-y-1">
-        [cite_start]<li><strong>ｃ コマーシャル・ペーパー：</strong> 適切。現金同等物の例です [cite: 361]。</li>
-        [cite_start]<li><strong>ｄ 定期預金：</strong> 適切。3か月以内であれば該当します [cite: 362]。</li>
-        [cite_start]<li>※株式(ａ)や株式投資信託(ｂ)は価格変動リスクが大きいため対象外です [cite: 359, 360]。</li>
-        [cite_start]<li>※普通預金(ｅ)は「現金同等物」ではなく「現金」に分類されます [cite: 363]。</li>
-      </ul>
-    `
+    year: "平成25年",
+    number: "第4問",
+    title: "資金の範囲",
+    question: "キャッシュ・フロー計算書が対象とする資金の範囲は、現金及び現金同等物である。現金同等物に含まれる短期投資に該当する最も適切なものの組み合わせを下記の解答群から選べ。なお、ａ〜ｅの資産の運用期間はすべて3か月以内であるとする。\n\nａ　株式\nｂ　株式投資信託\nｃ　コマーシャル・ペーパー\nｄ　定期預金\nｅ　普通預金",
+    options: ["ａとｂ", "ａとｃ", "ｂとｃ", "ｃとｄ", "ｄとｅ"],
+    answer: 3,
+    explanation: "キャッシュ・フロー計算書が対象とする資金の範囲は、「現金及び現金同等物」です。\n① 現金：手許現金、要求払預金（当座預金、普通預金、通知預金など）\n② 現金同等物：容易に換金可能であり、かつ、価値の変動について僅少なリスクしか負わない短期投資（取得日から3ヶ月以内の定期預金、CP、公社債投資信託など）\n\n記述ａ（株式）およびｂ（株式投資信託）は、価値の変動リスクが僅少とはいえないため、現金同等物には含まれません。記述ｅ（普通預金）は「現金」に該当し、「現金同等物」ではありません。"
   },
   {
     id: 2,
-    category: "C/Fの構造",
+    year: "令和5年",
+    number: "第9問",
+    title: "キャッシュ･フロー計算書の構造",
     question: "キャッシュ･フロー計算書に関する記述として、最も適切なものはどれか。",
     options: [
       "間接法によるキャッシュ･フロー計算書では、棚卸資産の増加額は営業活動によるキャッシュ・フローの増加要因として表示される。",
@@ -55,42 +52,25 @@ const problemData = [
       "支払利息は、営業活動によるキャッシュ・フローの区分で表示する方法と財務活動によるキャッシュ・フローの区分で表示する方法の2つが認められている。",
       "有形固定資産の売却による収入は、財務活動によるキャッシュ・フローの区分で表示される。"
     ],
-    correctAnswer: 2,
-    explanation: `
-      <p class="font-bold mb-2">正解：ウ</p>
-      <ul class="text-sm space-y-2">
-        [cite_start]<li><strong>ア ×：</strong> 棚卸資産が増加するとキャッシュは減少するため、減少要因となります [cite: 376]。</li>
-        [cite_start]<li><strong>イ ×：</strong> 期間が3ヶ月以内であれば、定期預金も資金の範囲に含まれます [cite: 377]。</li>
-        [cite_start]<li class="text-blue-700 font-bold"><strong>ウ ○：</strong> 支払利息は財務活動の区分が一般的ですが、営業活動の区分での表示も認められています [cite: 378]。</li>
-        [cite_start]<li><strong>エ ×：</strong> 有形固定資産の売却収入は「投資活動によるキャッシュ・フロー」に区分されます [cite: 379]。</li>
-      </ul>
-    `
+    answer: 2,
+    explanation: "ア：不適切。棚卸資産が増加した場合はキャッシュが減少するため、営業CFの減少要因となります。\nイ：不適切。取得日から3ヶ月以内の定期預金は現金同等物に含まれます。\nウ：適切。支払利息は、原則として財務活動ですが、営業活動に含める方法も認められています。\nエ：不適切。有形固定資産の売却は「投資活動によるキャッシュ・フロー」です。"
   },
   {
     id: 3,
-    category: "キャッシュの増加要因",
+    year: "令和3年",
+    number: "第9問",
+    title: "キャッシュ・フローの増加",
     question: "キャッシュ・フローが増加する原因として、最も適切なものはどれか。",
-    options: [
-      "売掛金の減少",
-      "仕入債務の減少",
-      "棚卸資産の増加",
-      "長期借入金の減少"
-    ],
-    correctAnswer: 0,
-    explanation: `
-      <p class="font-bold mb-2">正解：ア</p>
-      <p class="text-sm mb-2">資産の減少や負債の増加が、キャッシュの増加につながります。</p>
-      <div class="bg-gray-50 p-2 border rounded text-xs space-y-1">
-        [cite_start]<p class="text-blue-700 font-bold">ア ○：売掛金(資産)の減少 ＝ 代金を回収したため、現金が増える [cite: 391]。</p>
-        [cite_start]<p>イ ×：仕入債務(負債)の減少 ＝ 代金を支払ったため、現金が減る [cite: 392]。</p>
-        [cite_start]<p>ウ ×：棚卸資産(資産)の増加 ＝ 商品を仕入れたため、現金が減る [cite: 393]。</p>
-        [cite_start]<p>エ ×：長期借入金(負債)の減少 ＝ 借金を返済したため、現金が減る [cite: 394]。</p>
-      </div>
-    `
+    options: ["売掛金の減少", "仕入債務の減少", "棚卸資産の増加", "長期借入金の減少"],
+    answer: 0,
+    isBsStructure: true,
+    explanation: "売掛金が減少するということは、代金を回収して現金が増えたことを意味します。貸借対照表の左側（資産）が減ると現金が増え、右側（負債・純資産）が増えると現金が増えるという構造を理解しましょう。"
   },
   {
     id: 4,
-    category: "C/Fの表示",
+    year: "令和2年",
+    number: "第13問",
+    title: "キャッシュ・フロー計算書",
     question: "キャッシュ・フロー計算書に関する記述として、最も適切なものはどれか。",
     options: [
       "「営業活動によるキャッシュ・フロー」の区分では、主要な取引ごとにキャッシュ・フローを総額表示しなければならない。",
@@ -98,20 +78,14 @@ const problemData = [
       "キャッシュ・フロー計算書の現金及び現金同等物期末残高と、貸借対照表の現金及び預金の期末残高は一致するとは限らない。",
       "法人税等の支払額は、「財務活動によるキャッシュ・フロー」の区分に表示される。"
     ],
-    correctAnswer: 2,
-    explanation: `
-      <p class="font-bold mb-2">正解：ウ</p>
-      <ul class="text-sm space-y-2">
-        [cite_start]<li><strong>ア ×：</strong> 間接法では主要な取引ごとの表示は行いません [cite: 407]。</li>
-        [cite_start]<li><strong>イ ×：</strong> 投資活動の区分に表示する方法も認められています [cite: 408]。</li>
-        [cite_start]<li class="text-blue-700 font-bold"><strong>ウ ○：</strong> C/Fは3ヶ月以内、B/Sは1年以内など対象範囲が異なるため、一致するとは限りません [cite: 409]。</li>
-        [cite_start]<li><strong>エ ×：</strong> 法人税等の支払額は「営業活動によるキャッシュ・フロー」の小計より下に記載します [cite: 410]。</li>
-      </ul>
-    `
+    answer: 2,
+    explanation: "ア：不適切。間接法では総額表示は行いません。\nイ：不適切。投資活動CFに表示する方法も認められています。\nウ：適切。C/Fの現金同等物は「3ヶ月以内」、B/Sの現金預金は「1年以内」の定期預金を含むため、範囲が異なり一致しないことがあります。\nエ：不適切。法人税等は「営業活動によるキャッシュ・フロー」の小計の下に記載されます。"
   },
   {
     id: 5,
-    category: "C/Fの3区分",
+    year: "平成30年",
+    number: "第12問",
+    title: "営業キャッシュ・フローの計算",
     question: "キャッシュ・フロー計算書に関する記述として、最も適切なものはどれか。",
     options: [
       "財務活動によるキャッシュ・フローの区分には、資金調達に関する収入や支出、有価証券の取得や売却、および貸し付けに関する収入や支出が表示される。",
@@ -119,307 +93,371 @@ const problemData = [
       "法人税等の支払額は、財務活動によるキャッシュ・フローの区分で表示される。",
       "利息および配当金の受取額については、営業活動によるキャッシュ・フローの区分で表示する方法と投資活動によるキャッシュ・フローの区分で表示する方法が認められている。"
     ],
-    correctAnswer: 3,
-    explanation: `
-      <p class="font-bold mb-2">正解：エ</p>
-      <ul class="text-sm space-y-1">
-        [cite_start]<li><strong>ア ×：</strong> 貸付や有価証券の取得等は「投資活動」に区分されます [cite: 422]。</li>
-        [cite_start]<li><strong>イ ×：</strong> 仕入債務（負債）の増加は、キャッシュのプラスとして表示されます [cite: 423]。</li>
-        [cite_start]<li><strong>ウ ×：</strong> 法人税支払は「営業活動」の区分です [cite: 424]。</li>
-        [cite_start]<li class="text-blue-700 font-bold"><strong>エ ○：</strong> 利息・配当の受取は、第1法(営業)と第2法(投資)の選択が可能です [cite: 425]。</li>
-      </ul>
-    `
+    answer: 3,
+    explanation: "ア：不適切。有価証券や貸し付けは「投資活動CF」です。\nイ：不適切。仕入債務の増加は「支払を待ってもらっている＝資金が手元に残る」ためプラス表示です。\nウ：不適切。営業活動CFの区分です。\nエ：適切。利息・配当金の受取は営業活動と投資活動のいずれでも表示可能です。"
   },
   {
     id: 6,
-    category: "資金繰り計算(設問1)",
-    question: "資料に基づいて、6月末の資金残高を200万円以上に保つために必要な借入金の額を求めよ。なお、借入時に利息(年利5％)を1年分前払いするものとする。\n\n【6月の収支予測】\n・前月末残高： 470万円\n・収入合計： 1,040万円\n・支出合計： 1,500万円(現金仕入960＋諸経費540)\n・収支過不足： －460万円",
-    options: [
-      "190万円",
-      "200万円",
-      "460万円",
-      "660万円"
-    ],
-    correctAnswer: 1,
-    explanation: `
-      <p class="font-bold mb-2">正解：イ (200万円)</p>
-      <div class="bg-blue-50 p-3 rounded text-sm space-y-2">
-        <p><strong>1. 借入前の残高を算出：</strong></p>
-        [cite_start]<p>470 － 460 ＝ <strong>10万円</strong> [cite: 451, 452]</p>
-        <p><strong>2. 必要な借入額(X)の計算：</strong></p>
-        [cite_start]<p>残高10 ＋ 借入額X － 利息0.05X ≧ 200 [cite: 454]</p>
-        <p>0.95X ≧ 190</p>
-        [cite_start]<p class="font-bold text-lg text-blue-700">X ≧ 200万円 [cite: 456, 457]</p>
-      </div>
-    `
+    year: "令和4年",
+    number: "第13問(設問1)",
+    title: "資金繰り (設問1)",
+    question: "A社ではX1年4月末に作成した資金繰り表に基づき、6月末時点で資金残高が200万円を下回らないようにするための必要借入額を検討している。以下の表と条件に基づき、いくら借り入れればよいか。なお、借入金の利息は年利率5％で、1年分の利息を借入時に支払うものとする。\n\n【条件】\n①売上代金の20％は現金受取、残額は翌月末。\n②仕入高は翌月予想売上高の60％、全額現金支払。\n③収入・支出は月末発生。\n④資金残高は200万円を下回らないこと。",
+    isSpecialTable: true,
+    options: ["190万円", "200万円", "460万円", "660万円"],
+    answer: 1,
+    explanation: "6月の現金仕入 = 7月予想売上1600 × 60% = 960万円\n6月支出合計 = 960 + 540(諸経費) = 1,500万円\n6月収支過不足 = 1,040(収入計) - 1,500 = -460万円\n6月当月残高(借入前) = 5月末470 - 460 = 10万円\n借入額をXとすると：10 + X - 0.05X ≧ 200 \n0.95X ≧ 190 \nX ≧ 200万円"
   },
   {
     id: 7,
-    category: "資金繰り対策(設問2)",
-    question: "中小企業診断士としてA社のアドバイスを求められた。6月末の資金残高を200万円以上に保つための手段として、最も適切なものはどれか。(現状の6月末残高予想は10万円である。)",
+    year: "令和4年",
+    number: "第13問(設問2)",
+    title: "資金繰り (設問2)",
+    question: "中小企業診断士として、銀行借り入れ以外の手段で、6月末の資金残高を200万円以上に保つためのアドバイスとして最も適切なものはどれか。",
     options: [
       "5月に予定されている事務用備品の購入支出のうち半額を現金払いとし、残額の支払いは7月に延期する。",
       "6月に予定されている諸費用支払のうち400万円を現金払いとし、残額の支払いは7月に延期する。",
       "仕入先と交渉して、6月の仕入代金のうち半額を現金払いとし、残額を買掛金(翌月末払い)とする。",
       "得意先と交渉して、5月の売上代金のうち半額を現金で受け取り、残額を売掛金(翌月末回収)とする。"
     ],
-    correctAnswer: 2,
-    explanation: `
-      <p class="font-bold mb-2">正解：ウ</p>
-      [cite_start]<p class="text-sm mb-2"><strong>ウ ○：</strong> 6月の現金仕入れ(960万)を半分(480万)に抑えると、支出が480万減ります。結果、6月末残高は 10 ＋ 480 ＝ <strong>490万円</strong> となり、目標を達成できます [cite: 482]。</p>
-      <ul class="text-xs text-gray-500 space-y-1">
-        [cite_start]<li>ア ×：5月残高は増えますが、6月末は160万にしかならず不足します [cite: 480]。</li>
-        [cite_start]<li>イ ×：支出が140万減りますが、6月末は150万となり不足します [cite: 481]。</li>
-        [cite_start]<li>エ ×：5月の現金売上は増えますが、その分6月の売掛金回収が減るため、6月末は10万のままで改善されません [cite: 483]。</li>
-      </ul>
-    `
+    answer: 2,
+    explanation: "ウが適切です。6月の現金仕入れ予定額は960万円であり、その半額(480万円)を翌月払いにすることで、6月の現金支出が480万円減少します。これにより6月末残高は10 + 480 = 490万円となり、目標を達成します。"
   }
 ];
 
-// --- コンポーネント実装 ---
+// --- スタイル定義 ---
+const styles = {
+  card: "bg-white rounded-2xl shadow-lg border border-blue-100 overflow-hidden",
+  buttonPrimary: "bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-xl transition-all shadow-md active:scale-95 disabled:opacity-50",
+  buttonSecondary: "bg-white hover:bg-blue-50 text-blue-600 border-2 border-blue-600 font-bold py-3 px-6 rounded-xl transition-all active:scale-95",
+  optionButton: (isSelected, isCorrect, isWrong) => `
+    w-full text-left p-4 rounded-xl border-2 transition-all mb-3 flex items-center justify-between
+    ${isSelected ? 'scale-[0.98]' : 'hover:border-blue-300 hover:bg-blue-50'}
+    ${isCorrect ? 'border-green-500 bg-green-50 text-green-700' : 
+      isWrong ? 'border-red-500 bg-red-50 text-red-700' : 
+      'border-slate-200 bg-white text-slate-700'}
+  `
+};
 
 export default function App() {
-  const [currentScreen, setCurrentScreen] = useState('menu'); 
-  const [quizMode, setQuizMode] = useState('all'); 
-  const [currentProblemIndex, setCurrentProblemIndex] = useState(0);
-  const [filteredProblems, setFilteredProblems] = useState([]);
-  const [userAnswers, setUserAnswers] = useState({}); 
-  const [reviewFlags, setReviewFlags] = useState({}); 
-  const [showExplanation, setShowExplanation] = useState(false);
-  const [selectedOption, setSelectedOption] = useState(null);
+  const [screen, setScreen] = useState('home'); // home, list, quiz, result
+  const [currentQuizIndex, setCurrentQuizIndex] = useState(0);
+  const [userAnswers, setUserAnswers] = useState({}); // { id: { answer, isCorrect } }
+  const [reviewList, setReviewList] = useState([]); // Array of IDs
+  const [isAnswered, setIsAnswered] = useState(false);
+  const [filter, setFilter] = useState('all'); // all, incorrect, review
+  const [shuffledQuizzes, setShuffledQuizzes] = useState([]);
 
+  // 永続化の読み込み
   useEffect(() => {
-    const savedAnswers = JSON.parse(localStorage.getItem('past_exam_2_4_answers')) || {};
-    const savedReviews = JSON.parse(localStorage.getItem('past_exam_2_4_reviews')) || {};
-    setUserAnswers(savedAnswers);
-    setReviewFlags(savedReviews);
+    console.log("初期データを読み込み中...");
+    const savedResults = localStorage.getItem('accounting_quiz_v2_4_results');
+    const savedReviews = localStorage.getItem('accounting_quiz_v2_4_reviews');
+    if (savedResults) setUserAnswers(JSON.parse(savedResults));
+    if (savedReviews) setReviewList(JSON.parse(savedReviews));
   }, []);
 
+  // 永続化の保存
   useEffect(() => {
-    localStorage.setItem('past_exam_2_4_answers', JSON.stringify(userAnswers));
-    localStorage.setItem('past_exam_2_4_reviews', JSON.stringify(reviewFlags));
-  }, [userAnswers, reviewFlags]);
+    localStorage.setItem('accounting_quiz_v2_4_results', JSON.stringify(userAnswers));
+    localStorage.setItem('accounting_quiz_v2_4_reviews', JSON.stringify(reviewList));
+    console.log("データを保存しました。現在のステート:", { userAnswers, reviewList });
+  }, [userAnswers, reviewList]);
 
+  // クイズ開始処理
   const startQuiz = (mode) => {
-    let targets = [];
-    if (mode === 'all') {
-      targets = problemData;
-    } else if (mode === 'wrong') {
-      targets = problemData.filter(p => userAnswers[p.id] && !userAnswers[p.id].isCorrect);
-    } else if (mode === 'review') {
-      targets = problemData.filter(p => reviewFlags[p.id]);
-    }
+    setFilter(mode);
+    let list = [];
+    if (mode === 'all') list = [...QUIZ_DATA];
+    if (mode === 'incorrect') list = QUIZ_DATA.filter(q => userAnswers[q.id] && !userAnswers[q.id].isCorrect);
+    if (mode === 'review') list = QUIZ_DATA.filter(q => reviewList.includes(q.id));
 
-    if (targets.length === 0) {
-      alert("対象となる問題がありません。");
+    if (list.length === 0) {
+      alert("該当する問題がありません。");
       return;
     }
-
-    setQuizMode(mode);
-    setFilteredProblems(targets);
-    setCurrentProblemIndex(0);
-    setShowExplanation(false);
-    setSelectedOption(null);
-    setCurrentScreen('quiz');
+    setShuffledQuizzes(list);
+    setCurrentQuizIndex(0);
+    setIsAnswered(false);
+    setScreen('quiz');
+    console.log(`クイズ開始 モード: ${mode}, 問題数: ${list.length}`);
   };
 
-  const handleAnswer = (optionIndex) => {
-    setSelectedOption(optionIndex);
-    const problem = filteredProblems[currentProblemIndex];
-    const isCorrect = optionIndex === problem.correctAnswer;
-    
+  const handleSelectOption = (idx) => {
+    if (isAnswered) return;
+    const currentQ = shuffledQuizzes[currentQuizIndex];
+    const isCorrect = idx === currentQ.answer;
     setUserAnswers(prev => ({
       ...prev,
-      [problem.id]: { answerIndex: optionIndex, isCorrect: isCorrect }
+      [currentQ.id]: { answer: idx, isCorrect }
     }));
-    setShowExplanation(true);
+    setIsAnswered(true);
   };
 
-  const nextProblem = () => {
-    if (currentProblemIndex < filteredProblems.length - 1) {
-      setCurrentProblemIndex(prev => prev + 1);
-      setShowExplanation(false);
-      setSelectedOption(null);
-    } else {
-      setCurrentScreen('result');
-    }
+  const toggleReview = (id) => {
+    setReviewList(prev => 
+      prev.includes(id) ? prev.filter(rid => rid !== id) : [...prev, id]
+    );
   };
 
-  const toggleReview = (problemId) => {
-    setReviewFlags(prev => ({ ...prev, [problemId]: !prev[problemId] }));
-  };
-
-  const stats = useMemo(() => {
-    const total = problemData.length;
+  const chartData = useMemo(() => {
     const correctCount = Object.values(userAnswers).filter(a => a.isCorrect).length;
-    const reviewCount = Object.values(reviewFlags).filter(Boolean).length;
-    return { total, correctCount, reviewCount };
-  }, [userAnswers, reviewFlags]);
+    const incorrectCount = Object.values(userAnswers).length - correctCount;
+    const remaining = QUIZ_DATA.length - Object.values(userAnswers).length;
+    return [
+      { name: '正解', value: correctCount, color: '#10b981' },
+      { name: '不正解', value: incorrectCount, color: '#ef4444' },
+      { name: '未解答', value: remaining, color: '#cbd5e1' }
+    ];
+  }, [userAnswers]);
 
-  if (currentScreen === 'menu') {
+  // --- 画面コンポーネント ---
+
+  const Header = () => (
+    <div className="bg-blue-600 text-white p-6 shadow-md flex justify-between items-center">
+      <div>
+        <h1 className="text-xl font-bold">会計クイズ Web</h1>
+        <p className="text-xs opacity-80 text-blue-100 tracking-wider uppercase">Cash Flow Statement Master</p>
+      </div>
+      <Activity className="w-8 h-8 text-blue-200" />
+    </div>
+  );
+
+  if (screen === 'home') {
     return (
-      <div className="min-h-screen bg-slate-50 text-slate-800 p-4 font-sans">
-        <div className="max-w-xl mx-auto space-y-6">
-          <header className="text-center py-8">
-            <div className="inline-block bg-blue-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-full mb-1">
-              財務・会計
-            </div>
-            <h1 className="text-2xl font-black text-slate-800 tracking-tight flex items-center justify-center gap-2">
-              <Calculator className="w-7 h-7 text-blue-600" /> 過去問セレクト 2-4
-            </h1>
-            <p className="text-slate-400 text-xs mt-1">キャッシュ・フロー計算書 集中演習</p>
-          </header>
-
-          <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-100 flex flex-col items-center">
-            <h2 className="text-sm font-black mb-4 w-full flex items-center gap-2 text-slate-600">
-              <Trophy className="w-4 h-4 text-yellow-500" /> 学習進捗
-            </h2>
-            <div className="w-44 h-44 relative">
+      <div className="min-h-screen bg-slate-50 flex flex-col font-sans text-slate-900">
+        <Header />
+        <main className="p-4 sm:p-8 max-w-4xl mx-auto w-full flex-1">
+          <section className="mb-8 text-center">
+            <h2 className="text-2xl font-black text-slate-800 mb-2">学習状況</h2>
+            <div className="h-[250px] w-full flex justify-center">
               <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie
-                    data={[
-                      { name: '正解', value: stats.correctCount, color: '#2563eb' },
-                      { name: '未クリア', value: stats.total - stats.correctCount, color: '#f1f5f9' },
-                    ]}
-                    cx="50%" cy="50%" innerRadius={55} outerRadius={75} paddingAngle={4} dataKey="value" stroke="none"
-                  >
-                    <Cell fill="#2563eb" />
-                    <Cell fill="#f1f5f9" />
-                  </Pie>
-                </PieChart>
+                <BarChart data={chartData}>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                  <XAxis dataKey="name" />
+                  <YAxis hide />
+                  <RechartsTooltip cursor={{fill: 'transparent'}} />
+                  <Bar dataKey="value" radius={[8, 8, 0, 0]}>
+                    {chartData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.color} />
+                    ))}
+                  </Bar>
+                </BarChart>
               </ResponsiveContainer>
-              <div className="absolute inset-0 flex flex-col items-center justify-center">
-                <span className="text-3xl font-black text-slate-800">{Math.round((stats.correctCount/stats.total)*100)}%</span>
-              </div>
             </div>
-            <div className="grid grid-cols-2 gap-4 text-center mt-4 w-full border-t border-slate-50 pt-4">
-              <div>
-                <p className="text-xl font-black text-blue-600">{stats.correctCount}<span className="text-xs text-slate-300">/{stats.total}</span></p>
-                <p className="text-[10px] text-slate-400 font-bold uppercase">Solved</p>
-              </div>
-              <div>
-                <p className="text-xl font-black text-orange-500">{stats.reviewCount}</p>
-                <p className="text-[10px] text-slate-400 font-bold uppercase">Review</p>
-              </div>
-            </div>
-          </div>
+          </section>
 
-          <div className="grid gap-3">
-            <button onClick={() => startQuiz('all')} className="flex items-center justify-between p-6 bg-slate-900 text-white rounded-3xl shadow-xl hover:bg-black transition active:scale-95">
-              <div className="flex items-center gap-4">
-                <div className="bg-white/10 p-2 rounded-xl"><Play className="w-5 h-5" /></div>
-                <div className="text-left"><div className="font-black">全問題を解く</div><div className="text-[10px] opacity-50 font-bold">過去問セレクト 全7問</div></div>
-              </div>
-              <ArrowRight className="w-5 h-5" />
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <button onClick={() => setScreen('list')} className={styles.buttonSecondary + " flex items-center justify-center gap-2"}>
+              <List className="w-5 h-5" /> 問題一覧を確認
             </button>
-            <div className="grid grid-cols-2 gap-3">
-              <button onClick={() => startQuiz('wrong')} className="p-4 bg-white border border-slate-100 text-red-600 rounded-3xl font-black text-xs flex flex-col items-center gap-2 hover:bg-red-50 transition active:scale-95">
-                <RotateCcw className="w-4 h-4" /> 間違えた問題
-              </button>
-              <button onClick={() => startQuiz('review')} className="p-4 bg-white border border-slate-100 text-orange-600 rounded-3xl font-black text-xs flex flex-col items-center gap-2 hover:bg-orange-50 transition active:scale-95">
-                <CheckSquare className="w-4 h-4" /> 復習リスト
-              </button>
-            </div>
+            <button onClick={() => startQuiz('all')} className={styles.buttonPrimary + " flex items-center justify-center gap-2"}>
+              <BookOpen className="w-5 h-5" /> 最初からチャレンジ
+            </button>
+            <button 
+              onClick={() => startQuiz('incorrect')} 
+              className="bg-red-100 hover:bg-red-200 text-red-700 font-bold py-3 px-6 rounded-xl transition-all flex items-center justify-center gap-2 border-2 border-red-200"
+            >
+              <XCircle className="w-5 h-5" /> 前回不正解のみ
+            </button>
+            <button 
+              onClick={() => startQuiz('review')} 
+              className="bg-amber-100 hover:bg-amber-200 text-amber-700 font-bold py-3 px-6 rounded-xl transition-all flex items-center justify-center gap-2 border-2 border-amber-200"
+            >
+              <Bookmark className="w-5 h-5" /> 要復習のみ
+            </button>
+          </div>
+        </main>
+      </div>
+    );
+  }
+
+  if (screen === 'list') {
+    return (
+      <div className="min-h-screen bg-slate-50 flex flex-col font-sans">
+        <Header />
+        <div className="p-4 sm:p-8 max-w-4xl mx-auto w-full">
+          <button onClick={() => setScreen('home')} className="flex items-center text-blue-600 mb-6 font-bold">
+            <ChevronLeft /> メニューに戻る
+          </button>
+          <h2 className="text-2xl font-bold mb-6 text-slate-800">問題一覧</h2>
+          <div className="space-y-3">
+            {QUIZ_DATA.map((q, idx) => {
+              const result = userAnswers[q.id];
+              return (
+                <div key={q.id} className={styles.card + " p-4 flex items-center justify-between"}>
+                  <div className="flex items-center gap-4">
+                    <span className="bg-slate-100 text-slate-500 w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm">
+                      {idx + 1}
+                    </span>
+                    <div>
+                      <div className="text-xs text-slate-400 font-bold">{q.year} {q.number}</div>
+                      <div className="font-bold text-slate-700">{q.title}</div>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    {result && (
+                      result.isCorrect ? 
+                      <CheckCircle2 className="text-green-500 w-6 h-6" /> : 
+                      <XCircle className="text-red-500 w-6 h-6" />
+                    )}
+                    {reviewList.includes(q.id) && <Bookmark className="text-amber-500 w-6 h-6 fill-amber-500" />}
+                    <button 
+                      onClick={() => { setShuffledQuizzes([q]); setCurrentQuizIndex(0); setIsAnswered(false); setScreen('quiz'); }}
+                      className="ml-2 text-blue-600 hover:underline text-sm font-bold"
+                    >
+                      開始
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </div>
       </div>
     );
   }
 
-  if (currentScreen === 'quiz') {
-    const problem = filteredProblems[currentProblemIndex];
-    const progress = ((currentProblemIndex + 1) / filteredProblems.length) * 100;
+  if (screen === 'quiz') {
+    const q = shuffledQuizzes[currentQuizIndex];
+    if (!q) return null;
+    const userAnswer = userAnswers[q.id];
 
     return (
-      <div className="min-h-screen bg-slate-50 text-slate-800 pb-20 font-sans">
-        <div className="sticky top-0 bg-white/90 backdrop-blur-md z-10 border-b border-slate-100">
-          <div className="h-1 bg-slate-100"><div className="h-full bg-blue-600 transition-all duration-500" style={{ width: `${progress}%` }}></div></div>
-          <div className="flex items-center justify-between p-4 max-w-2xl mx-auto">
-            <button onClick={() => setCurrentScreen('menu')} className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Quit</button>
-            <div className="font-black text-slate-700 text-sm">Q.{currentProblemIndex + 1} <span className="text-slate-300">/</span> {filteredProblems.length}</div>
-            <div className="text-[10px] font-black px-2 py-1 bg-blue-50 rounded text-blue-600 uppercase tracking-wider">{problem.category}</div>
+      <div className="min-h-screen bg-slate-50 flex flex-col font-sans">
+        <div className="bg-white border-b border-blue-100 p-4 sticky top-0 z-10 flex items-center justify-between shadow-sm">
+          <button onClick={() => setScreen('home')} className="text-slate-400 p-1">
+            <Home className="w-6 h-6" />
+          </button>
+          <div className="text-center">
+            <span className="text-xs font-black text-blue-600 block uppercase">Progress</span>
+            <span className="text-sm font-bold text-slate-700">{currentQuizIndex + 1} / {shuffledQuizzes.length}</span>
           </div>
+          <div className="w-8" />
         </div>
 
-        <div className="max-w-2xl mx-auto p-4 space-y-6 animate-in fade-in slide-in-from-bottom-4">
-          <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-100">
-            <p className="text-md font-bold leading-relaxed whitespace-pre-wrap">{problem.question}</p>
+        <main className="p-4 sm:p-8 max-w-2xl mx-auto w-full flex-1">
+          <div className="mb-6">
+            <div className="flex items-center gap-2 mb-2">
+              <span className="bg-blue-100 text-blue-600 text-[10px] font-black px-2 py-1 rounded">
+                {q.year} {q.number}
+              </span>
+              <span className="text-slate-400 text-[10px] font-bold tracking-widest uppercase">
+                {q.title}
+              </span>
+            </div>
+            <h3 className="text-lg font-bold text-slate-800 leading-relaxed whitespace-pre-wrap">{q.question}</h3>
           </div>
 
-          <div className="grid gap-3">
-            {problem.options.map((opt, idx) => {
-              let btnClass = "p-5 text-left rounded-3xl border-2 transition-all flex items-center gap-4 text-sm ";
-              if (showExplanation) {
-                if (idx === problem.correctAnswer) btnClass += "bg-green-50 border-green-500 text-green-700 font-bold";
-                else if (idx === selectedOption) btnClass += "bg-red-50 border-red-500 text-red-700 opacity-70";
-                else btnClass += "bg-white border-transparent opacity-30 shadow-none";
-              } else {
-                btnClass += "bg-white border-transparent shadow-sm hover:border-slate-200 active:scale-[0.98] font-medium";
-              }
+          {/* 画像をHTMLテーブルで再現 (問題3、問題6用) */}
+          {q.isBsStructure && (
+            <div className="mb-6 border-2 border-slate-300 rounded overflow-hidden max-w-sm mx-auto">
+              <div className="grid grid-cols-2 bg-white">
+                <div className="border-r border-b p-2 font-bold bg-green-50">流動資産</div>
+                <div className="border-b p-2 font-bold bg-green-50">流動負債</div>
+                <div className="border-r border-b p-2 pl-4 flex justify-between bg-orange-50"><span>現金</span></div>
+                <div className="border-b p-2 pl-4 bg-green-50">仕入債務</div>
+                <div className="border-r border-b p-2 pl-4 bg-green-50">売掛金</div>
+                <div className="border-b p-2 font-bold bg-green-50">固定負債</div>
+                <div className="border-r border-b p-2 pl-4 bg-green-50">棚卸資産</div>
+                <div className="border-b p-2 pl-4 bg-green-50 text-xs">長期借入金</div>
+                <div className="border-r p-2 font-bold bg-green-50">固定資産</div>
+                <div className="p-2 font-bold bg-green-50 border-t">純資産</div>
+              </div>
+            </div>
+          )}
+
+          {q.isSpecialTable && (
+            <div className="mb-6 overflow-x-auto text-[10px] sm:text-xs">
+              <table className="w-full border-collapse border border-slate-400 bg-white">
+                <thead>
+                  <tr className="bg-slate-100">
+                    <th colSpan="3" className="border border-slate-400 p-1">資金繰り表(一部)</th>
+                    <th className="border border-slate-400 p-1">5月</th>
+                    <th className="border border-slate-400 p-1">6月</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr><td colSpan="3" className="border border-slate-400 p-1">前月末残高</td><td className="border border-slate-400 p-1">1,000</td><td className="border border-slate-400 p-1">470</td></tr>
+                  <tr><td rowSpan="3" className="border border-slate-400 p-1 vertical-text">経常収支</td><td rowSpan="2" className="border border-slate-400 p-1">収入</td><td className="border border-slate-400 p-1">現金売上</td><td className="border border-slate-400 p-1">200</td><td className="border border-slate-400 p-1">240</td></tr>
+                  <tr><td className="border border-slate-400 p-1">売掛金回収</td><td className="border border-slate-400 p-1">800</td><td className="border border-slate-400 p-1">800</td></tr>
+                  <tr className="bg-slate-50 font-bold"><td></td><td></td><td className="border border-slate-400 p-1">収入合計</td><td className="border border-slate-400 p-1">1,000</td><td className="border border-slate-400 p-1">1,040</td></tr>
+                  <tr><td></td><td rowSpan="2" className="border border-slate-400 p-1">支出</td><td className="border border-slate-400 p-1">現金仕入</td><td className="border border-slate-400 p-1">720</td><td className="border border-slate-400 p-1">(   )</td></tr>
+                  <tr><td></td><td className="border border-slate-400 p-1">諸費用支払</td><td className="border border-slate-400 p-1">510</td><td className="border border-slate-400 p-1">540</td></tr>
+                  <tr className="bg-slate-50 font-bold"><td colSpan="3" className="border border-slate-400 p-1">支出合計</td><td className="border border-slate-400 p-1">1,230</td><td className="border border-slate-400 p-1">(   )</td></tr>
+                  <tr><td colSpan="3" className="border border-slate-400 p-1">収支過不足</td><td className="border border-slate-400 p-1">-230</td><td className="border border-slate-400 p-1">(   )</td></tr>
+                  <tr className="bg-blue-50 font-bold"><td colSpan="3" className="border border-slate-400 p-1 underline">当月末残高</td><td className="border border-slate-400 p-1">470</td><td className="border border-slate-400 p-1">(   )</td></tr>
+                </tbody>
+              </table>
+              <div className="mt-2 grid grid-cols-4 gap-1 text-center border-t border-slate-200 pt-2">
+                <div className="font-bold">売上予想:</div>
+                <div className="border border-slate-300 p-1 bg-white">5月: 1,000</div>
+                <div className="border border-slate-300 p-1 bg-white">6月: 1,200</div>
+                <div className="border border-slate-300 p-1 bg-white">7月: 1,600</div>
+              </div>
+            </div>
+          )}
+
+          <div className="space-y-3">
+            {q.options.map((opt, idx) => {
+              const isSelected = userAnswer?.answer === idx;
+              const isCorrect = q.answer === idx;
               return (
-                <button key={idx} disabled={showExplanation} onClick={() => handleAnswer(idx)} className={btnClass}>
-                  <span className={`w-8 h-8 rounded-xl flex items-center justify-center font-black text-xs ${showExplanation && idx === problem.correctAnswer ? 'bg-green-500 text-white' : 'bg-slate-100 text-slate-400'}`}>
-                    {['ア','イ','ウ','エ','オ'][idx]}
-                  </span>
-                  <span className="flex-1">{opt}</span>
+                <button 
+                  key={idx} 
+                  onClick={() => handleSelectOption(idx)}
+                  className={styles.optionButton(isSelected, isAnswered && isCorrect, isAnswered && isSelected && !isCorrect)}
+                >
+                  <span className="flex-1 pr-2">{opt}</span>
+                  {isAnswered && isCorrect && <CheckCircle2 className="w-5 h-5 text-green-600 shrink-0" />}
+                  {isAnswered && isSelected && !isCorrect && <XCircle className="w-5 h-5 text-red-600 shrink-0" />}
                 </button>
               );
             })}
           </div>
 
-          {showExplanation && (
-            <div className="space-y-4 animate-in zoom-in-95 duration-300">
-              <div className={`p-6 rounded-3xl border shadow-sm ${selectedOption === problem.correctAnswer ? 'bg-white border-green-100' : 'bg-white border-red-100'}`}>
-                <div className="flex items-center gap-3 mb-4">
-                  <div className={`p-1.5 rounded-full ${selectedOption === problem.correctAnswer ? 'bg-green-500' : 'bg-red-500'} text-white`}>
-                    {selectedOption === problem.correctAnswer ? <CheckCircle className="w-5 h-5" /> : <XCircle className="w-5 h-5" />}
-                  </div>
-                  <div className={`text-lg font-black ${selectedOption === problem.correctAnswer ? 'text-green-700' : 'text-red-700'}`}>
-                    {selectedOption === problem.correctAnswer ? '正解です！' : '残念...'}
-                  </div>
+          {isAnswered && (
+            <div className="mt-8 animate-in slide-in-from-bottom-2 duration-300">
+              <div className="bg-white p-6 rounded-2xl border-2 border-blue-200 shadow-sm">
+                <div className="flex items-center gap-2 mb-4">
+                  <AlertCircle className="text-blue-600 w-6 h-6" />
+                  <h4 className="text-lg font-black text-slate-800 tracking-tighter uppercase">解説</h4>
                 </div>
-                <div className="text-sm leading-relaxed text-slate-600 bg-slate-50/50 p-4 rounded-2xl border border-slate-50" dangerouslySetInnerHTML={{ __html: problem.explanation }} />
+                <p className="text-slate-700 leading-relaxed mb-6 whitespace-pre-wrap text-sm border-l-4 border-blue-600 pl-4 py-1">
+                  {q.explanation}
+                </p>
                 
-                <label className="flex items-center gap-3 mt-4 p-3 bg-white border border-orange-50 rounded-2xl cursor-pointer shadow-sm">
-                  <input type="checkbox" checked={!!reviewFlags[problem.id]} onChange={() => toggleReview(problem.id)} className="w-4 h-4 rounded border-slate-200 text-orange-500 focus:ring-orange-500" />
-                  <span className="text-xs font-black text-slate-500">この問題を復習リストに追加</span>
-                </label>
-              </div>
+                <div className="flex flex-col sm:flex-row gap-4 items-center justify-between border-t border-slate-100 pt-6">
+                  <label className="flex items-center gap-3 cursor-pointer group">
+                    <div className={`w-6 h-6 rounded-md border-2 flex items-center justify-center transition-colors ${reviewList.includes(q.id) ? 'bg-amber-500 border-amber-500' : 'bg-white border-slate-300'}`}>
+                      {reviewList.includes(q.id) && <Check className="text-white w-4 h-4" />}
+                    </div>
+                    <input 
+                      type="checkbox" 
+                      className="hidden" 
+                      checked={reviewList.includes(q.id)} 
+                      onChange={() => toggleReview(q.id)} 
+                    />
+                    <span className="text-sm font-bold text-slate-600 group-hover:text-amber-600 transition-colors italic uppercase tracking-wider">要復習リストに追加</span>
+                  </label>
 
-              <button onClick={nextProblem} className="w-full p-6 bg-slate-900 text-white font-black rounded-3xl shadow-xl flex items-center justify-center gap-3 hover:bg-black transition active:scale-95">
-                {currentProblemIndex === filteredProblems.length - 1 ? '結果を見る' : '次の問題へ'} <ArrowRight className="w-5 h-5" />
-              </button>
+                  <button 
+                    onClick={() => {
+                      if (currentQuizIndex < shuffledQuizzes.length - 1) {
+                        setCurrentQuizIndex(prev => prev + 1);
+                        setIsAnswered(false);
+                      } else {
+                        setScreen('home');
+                      }
+                    }}
+                    className={styles.buttonPrimary + " px-10 flex items-center gap-2"}
+                  >
+                    {currentQuizIndex < shuffledQuizzes.length - 1 ? '次の問題へ' : '結果を確認'} <ChevronRight className="w-5 h-5" />
+                  </button>
+                </div>
+              </div>
             </div>
           )}
-        </div>
-      </div>
-    );
-  }
-
-  if (currentScreen === 'result') {
-    const sessionCorrect = filteredProblems.filter(p => userAnswers[p.id]?.isCorrect).length;
-    const score = Math.round((sessionCorrect / filteredProblems.length) * 100);
-
-    return (
-      <div className="min-h-screen bg-slate-900 flex items-center justify-center p-4 font-sans text-white">
-        <div className="max-w-md w-full space-y-8 text-center animate-in zoom-in-90 duration-500">
-          <div className="relative inline-block">
-            <div className="w-28 h-28 bg-yellow-500 rounded-full flex items-center justify-center mx-auto shadow-[0_0_40px_rgba(234,179,8,0.2)]">
-              <Trophy className="w-14 h-14 text-slate-900" />
-            </div>
-          </div>
-          
-          <div>
-            <h2 className="text-3xl font-black tracking-tighter mb-2 italic uppercase">Finish!</h2>
-            <div className="text-7xl font-black mb-4 tracking-tighter text-yellow-500">{score}<span className="text-3xl font-bold text-white ml-1">%</span></div>
-            <p className="text-slate-400 font-black tracking-widest uppercase text-xs">Score: {sessionCorrect} / {filteredProblems.length}</p>
-          </div>
-
-          <button onClick={() => setCurrentScreen('menu')} className="w-full p-6 bg-white text-slate-900 font-black rounded-3xl shadow-xl hover:bg-slate-100 transition active:scale-95">
-            メニューに戻る
-          </button>
-        </div>
+        </main>
       </div>
     );
   }
